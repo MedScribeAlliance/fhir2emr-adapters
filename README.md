@@ -1,5 +1,6 @@
-# FHIR2EMR-adapters
-Adapters to connect standardised FHIR output (created using Scribe2FHIR sdk) to EMR input format. 
+# FHIR to EMR Adapters
+
+Universal adapters to connect standardized FHIR output (created using Scribe2FHIR SDK) to various EMR input formats. 
 
 ## 📋 Table of Contents
 
@@ -9,7 +10,7 @@ Adapters to connect standardised FHIR output (created using Scribe2FHIR sdk) to 
 - [Key Features](#key-features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [FHIR to EKA Mapping](#fhir-to-eka-mapping)
+- [FHIR to EMR Mapping](#fhir-to-emr-mapping)
 - [Integration Scenarios](#integration-scenarios)
 - [Parser Modules](#parser-modules)
 - [Utility Functions](#utility-functions)
@@ -26,46 +27,48 @@ Adapters to connect standardised FHIR output (created using Scribe2FHIR sdk) to 
 
 ## Overview
 
-This adapter enables seamless integration between any [medScribe Alliance](https://github.com/medScribeAlliance/) compliant scribe engine and EKA Care EMR system. It transforms FHIR Bundle resources into EKA Care's proprietary EMR input format, bridging universal healthcare standards with specialized EMR systems.
+These adapters enable seamless integration between any [medScribe Alliance](https://github.com/medScribeAlliance/) compliant scribe engine and various EMR systems. They transform FHIR Bundle resources into EMR-specific input formats, bridging universal healthcare standards with specialized EMR systems.
 
-### Why This Adapter?
+**Currently supported EMR systems:**
+- [EKA Care](./eka/) - Indian healthcare EMR platform
+
+### Why These Adapters?
 
 - **Universal Compatibility**: Works with any medScribe Alliance compliant scribe engine
-- **Standardized Input**: Uses FHIR (Fast Healthcare Interoperability Resources) standard  
+- **Standardized Input**: Uses FHIR (Fast Healthcare Interoperability Resources) standard
+- **Multi-EMR Support**: Adapters for multiple EMR systems in one repository
 - **Modular Design**: Each medical entity has its own parser module
 - **Production-Ready**: Comprehensive error handling, logging, and validation
 - **Zero Dependencies**: Lightweight with no runtime dependencies
-- **Fast**: Converts typical bundles in ~2ms
+- **Fast**: Converts typical bundles in milliseconds
 - **Well-Documented**: Extensive documentation and examples
 
-### Test Results
+### Adapter Coverage
 
-Successfully tested with sample data (22 items converted in 2ms):
-- ✅ 2 Symptoms
-- ✅ 2 Diagnoses  
-- ✅ 1 Medication
-- ✅ 2 Lab Tests + 2 Lab Results
-- ✅ 1 Vital Sign
-- ✅ Complete Medical History (conditions, family history, allergies, procedures)
+Each adapter supports comprehensive FHIR resource conversion:
+- ✅ Symptoms and Clinical Observations
+- ✅ Diagnoses and Conditions
+- ✅ Medications and Prescriptions
+- ✅ Lab Tests and Results
+- ✅ Vital Signs
+- ✅ Medical History (conditions, family history, allergies, procedures)
+- ✅ Procedures and Interventions
+- ✅ Follow-up and Appointments
 
 ## Quick Start
 
+Each EMR adapter is in its own directory:
+
 ```bash
-# Install dependencies
+# EKA Care adapter
+cd eka/js
 npm install
-
-# Run example conversion
+npm run build
 npm run example
-
-# Output will be saved to eka-emr-output.json
 ```
 
-**Programmatic Usage:**
-```javascript
-const { convertFHIRToEkaEMR } = require('./src/index');
-const fhirBundle = require('./scribe_output.json');
-const ekaInput = convertFHIRToEkaEMR(fhirBundle);
-```
+See individual adapter directories for specific usage:
+- [EKA Care Adapter](./eka/) - Complete documentation and examples
 
 ## Architecture
 
@@ -95,7 +98,7 @@ const ekaInput = convertFHIRToEkaEMR(fhirBundle);
                                 │ FHIR R4/R5 Bundle
                                 ▼
             ╔═══════════════════════════════════════╗
-            ║      EKA EMR ADAPTER (This Module)    ║
+            ║    FHIR TO EMR ADAPTER (This Repo)    ║
             ╠═══════════════════════════════════════╣
             ║  ┌─────────────────────────────────┐ ║
             ║  │     Main Adapter (index.js)     │ ║
@@ -107,20 +110,21 @@ const ekaInput = convertFHIRToEkaEMR(fhirBundle);
             ║  │ • 11 Modules        │ • 9 Fns │  ║
             ║  └─────────┘           └─────────┘  ║
             ╚════════════════╦══════════════════════╝
-                             │ EKA Care Format
+                             │ EMR-Specific Format
                              ▼
                     ┌─────────────────┐
-                    │  EKA CARE EMR   │
+                    │    TARGET EMR   │
                     │  • Records      │
                     │  • Prescriptions│
+                    │  • Patient Data │
                     └─────────────────┘
 ```
 
 ### Integration Flow
 
 ```
-Clinical Voice → Scribe Engine → FHIR Bundle → EKA Adapter → EKA EMR
-  (Audio)        (AI Processing)   (Standard)    (Converter)   (System)
+Clinical Voice → Scribe Engine → FHIR Bundle → EMR Adapter → Target EMR
+  (Audio)        (AI Processing)   (Standard)    (Converter)    (System)
 ```
 
 **Compatible Scribe Engines:**
@@ -149,7 +153,7 @@ Clinical Voice → Scribe Engine → FHIR Bundle → EKA Adapter → EKA EMR
 Handles Observation, Condition, MedicationRequest, MedicationStatement, ServiceRequest, Procedure, FamilyMemberHistory, AllergyIntolerance, Appointment, and more.
 
 ### 3. Utility Functions (9 Helpers)
-`generateEkaId()`, `getResourcesByType()`, `calculateDuration()`, `mapSeverity()`, `extractNotes()`, and more.
+ID generation, resource filtering, duration calculation, severity mapping, note extraction, and more.
 
 ### 4. Production Features
 - Zero runtime dependencies
@@ -161,71 +165,57 @@ Handles Observation, Condition, MedicationRequest, MedicationStatement, ServiceR
 ## Installation
 
 ```bash
-# Clone or download
+# Clone the repository
 git clone <repository-url>
-cd eka-emr-adaptar
+cd fhir2emr-adapters
+
+# Choose your EMR adapter
+cd eka/js
 npm install
 
-# Test
+# Build and test
+npm run build
 npm run example
 ```
 
-Or as a module:
+### As NPM Module
+
+Each adapter can be installed separately:
 ```bash
 npm install eka-emr-adapter
 ```
 
 ## Usage
 
-### Basic Usage
+Each adapter has its own API and usage patterns. See the adapter-specific documentation:
+
+### EKA Care Adapter
 
 ```javascript
 const { convertFHIRToEkaEMR } = require('eka-emr-adapter');
-const fs = require('fs');
 
-// Load FHIR Bundle
-const fhirBundle = JSON.parse(fs.readFileSync('scribe_output.json', 'utf-8'));
+// Load FHIR Bundle from any medScribe Alliance compliant engine
+const fhirBundle = require('./scribe_output.json');
 
-// Convert
-const ekaEMRInput = convertFHIRToEkaEMR(fhirBundle);
+// Convert to EKA Care format
+const ekaInput = convertFHIRToEkaEMR(fhirBundle);
 
-// Save or send to API
-fs.writeFileSync('eka-emr-input.json', JSON.stringify(ekaEMRInput, null, 2));
+// Use with EKA Care API
 console.log('✅ Conversion completed!');
 ```
 
-### Async Usage
+For complete API reference and examples, see:
+- [EKA Care Adapter Documentation](./eka/README.md)
+- [EKA Care Usage Guide](./eka/USAGE.md)
+- [Build & Browser Support](./eka/js/BUILD.md)
 
-```javascript
-const { convertFHIRToEkaEMRAsync } = require('eka-emr-adapter');
+## FHIR to EMR Mapping
 
-async function process(fhirBundle) {
-  const ekaInput = await convertFHIRToEkaEMRAsync(fhirBundle);
-  await sendToEkaCareAPI(ekaInput);
-  console.log('✅ Synced to EKA Care');
-}
-```
+### Resource Mapping Overview
 
-### API Reference
+Each adapter maps FHIR resources to EMR-specific formats. Example (EKA Care):
 
-#### `convertFHIRToEkaEMR(fhirBundle)`
-Converts FHIR Bundle to EKA EMR format (synchronous).
-
-**Parameters:** `fhirBundle` (Object) - FHIR Bundle with `resourceType: "Bundle"`  
-**Returns:** (Object) - EKA EMR formatted input  
-**Throws:** Error if bundle is invalid
-
-#### `convertFHIRToEkaEMRAsync(fhirBundle)`
-Async wrapper for conversion.
-
-**Parameters:** `fhirBundle` (Object)  
-**Returns:** Promise<Object>
-
-## FHIR to EKA Mapping
-
-### Resource Mapping Table
-
-| FHIR Resource | EKA EMR Section | Description |
+| FHIR Resource | Target EMR Section | Description |
 |---------------|-----------------|-------------|
 | `Observation` (symptom) | `symptoms[]` | Patient symptoms |
 | `Condition` (encounter-diagnosis) | `diagnosis[]` | Current diagnoses |
@@ -243,11 +233,13 @@ Async wrapper for conversion.
 | `Observation` (exam) | `medicalHistory.examinations[]` | Physical examinations |
 | `Appointment` | `followup{}` | Follow-up appointments |
 
-### Example Mappings
+### Example Mappings (EKA Care)
+
+For detailed mappings for each EMR, see the adapter-specific documentation.
 
 **Symptom Example:**
 ```javascript
-// FHIR Input
+// FHIR Input (Universal)
 {
   "resourceType": "Observation",
   "category": [{"coding": [{"code": "symptom"}]}],
@@ -278,7 +270,7 @@ Async wrapper for conversion.
 
 **Medication Example:**
 ```javascript
-// FHIR Input
+// FHIR Input (Universal)
 {
   "resourceType": "MedicationRequest",
   "medication": {"concept": {"text": "Dolo 650 Tablet"}},
@@ -288,7 +280,7 @@ Async wrapper for conversion.
   }]
 }
 
-// EKA Output
+// EMR Output (EKA Care format)
 {
   "id": "b-4117370658",
   "name": "Dolo 650 Tablet",
@@ -534,7 +526,7 @@ function convertWithErrorHandling(fhirBundle) {
 3. **Monitoring**: Track conversion success/failure rates
 4. **Versioning**: Version your adapter deployments
 5. **Testing**: Test with real scribe outputs before production
-6. **Security**: Use HTTPS and API keys for EKA API
+6. **Security**: Use HTTPS and API keys for EMR APIs
 7. **Rate Limiting**: Implement rate limiting for API calls
 8. **Caching**: Cache ICD-10 lookups and mappings
 9. **Async Processing**: Use queues for high-volume scenarios
@@ -559,7 +551,10 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 - [medScribe Alliance GitHub](https://github.com/medScribeAlliance/)
 - [FHIR R4 Specification](https://www.hl7.org/fhir/R4/)
-- [EKA Care](https://www.eka.care/)
+- [FHIR R5 Specification](https://www.hl7.org/fhir/R5/)
+
+### EMR Systems
+- [EKA Care](https://www.eka.care/) - Indian healthcare EMR platform
 
 ---
 
