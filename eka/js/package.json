@@ -2,8 +2,22 @@
   "name": "eka-emr-adapter",
   "version": "1.0.0",
   "description": "Convert FHIR-based scribe output to EKA Care EMR input format",
-  "main": "src/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "browser": "dist/index.browser.js",
+  "unpkg": "dist/index.browser.min.js",
+  "jsdelivr": "dist/index.browser.min.js",
+  "exports": {
+    ".": {
+      "browser": "./dist/index.browser.js",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    }
+  },
   "scripts": {
+    "build": "node build.js",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "node examples/convert.js",
     "convert": "node examples/convert.js"
@@ -33,9 +47,12 @@
   "engines": {
     "node": ">=14.0.0"
   },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  },
   "dependencies": {},
-  "devDependencies": {},
   "files": [
+    "dist/",
     "src/",
     "README.md",
     "LICENSE"

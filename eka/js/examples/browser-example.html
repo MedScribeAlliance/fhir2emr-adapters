@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EKA EMR Adapter - Browser Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #545b62;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #d1ecf1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 EKA EMR Adapter - Browser Example</h1>
+        
+        <div class="info">
+            This example demonstrates how to use the EKA EMR Adapter in a browser environment.
+            The adapter converts FHIR Bundle data to EKA Care EMR format.
+        </div>
+
+        <h3>Input: FHIR Bundle (JSON)</h3>
+        <textarea id="fhirInput" placeholder="Paste your FHIR Bundle JSON here..."></textarea>
+        
+        <button onclick="convertFHIR()">Convert to EKA EMR Format</button>
+        <button class="secondary" onclick="loadSample()">Load Sample Data</button>
+        <button class="secondary" onclick="clearOutput()">Clear Output</button>
+
+        <h3>Output: EKA EMR Format</h3>
+        <div id="output" class="output">Results will appear here...</div>
+    </div>
+
+    <!-- Load the EKA EMR Adapter library -->
+    <script src="../dist/index.browser.js"></script>
+    
+    <script>
+        // Sample FHIR Bundle for testing
+        const sampleFHIRBundle = {
+            "resourceType": "Bundle",
+            "type": "collection",
+            "entry": [
+                {
+                    "resource": {
+                        "resourceType": "Condition",
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://snomed.info/sct",
+                                    "code": "38341003",
+                                    "display": "Hypertension"
+                                }
+                            ],
+                            "text": "High Blood Pressure"
+                        },
+                        "clinicalStatus": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                                    "code": "active"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "resource": {
+                        "resourceType": "Observation",
+                        "code": {
+                            "coding": [
+                                {
+                                    "system": "http://loinc.org",
+                                    "code": "8867-4",
+                                    "display": "Heart rate"
+                                }
+                            ]
+                        },
+                        "valueQuantity": {
+                            "value": 72,
+                            "unit": "beats/minute"
+                        }
+                    }
+                }
+            ]
+        };
+
+        function convertFHIR() {
+            const input = document.getElementById('fhirInput').value;
+            const outputDiv = document.getElementById('output');
+
+            try {
+                // Parse input JSON
+                const fhirBundle = JSON.parse(input);
+                
+                // Use the EkaEMRAdapter global object
+                const result = EkaEMRAdapter.convertFHIRToEkaEMR(fhirBundle);
+                
+                // Display the result
+                outputDiv.innerHTML = '<span class="success">✓ Conversion successful!</span>\n\n' + 
+                                     JSON.stringify(result, null, 2);
+            } catch (error) {
+                outputDiv.innerHTML = '<span class="error">✗ Error:</span> ' + error.message;
+                console.error('Conversion error:', error);
+            }
+        }
+
+        function loadSample() {
+            document.getElementById('fhirInput').value = JSON.stringify(sampleFHIRBundle, null, 2);
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = 'Results will appear here...';
+        }
+
+        // Load sample data on page load
+        window.onload = function() {
+            loadSample();
+        };
+    </script>
+</body>
+</html>
