@@ -31,6 +31,8 @@ build/
 # Logs
 logs/
 *.log
+nohup.out
+server.log
 
 # Temporary files
 tmp/

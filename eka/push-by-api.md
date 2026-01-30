@@ -2,6 +2,10 @@
 ## Push data to EKA EMR using adapter
 
 - Use adapter: to convert FHIR to Eka EMR format
+OR use hosted Adapter
+```
+ curl -X POST https://eka-emr-adapter-production.up.railway.app/convert -H "Content-Type: application/json" -d '{"resourceType":"Bundle","type":"collection","entry":[{"resource":{"resourceType":"Condition","code":{"text":"Hypertension"},"category":[{"coding":[{"code":"encounter-diagnosis"}]}],"clinicalStatus":{"coding":[{"code":"active"}]}}}]}'
+ ```
 - pass the output of adapter to inside `tool`, sample below
 - Create a patient appointment, using https://developer.eka.care/api-reference/doc-tool/appointment-api/book-appointment-slot
 - Get `auth` header from https://console.eka.care/api-keys/ (Generate long lived token) 
