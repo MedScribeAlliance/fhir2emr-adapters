@@ -31,7 +31,7 @@ These adapters enable seamless integration between any [medScribe Alliance](http
 
 **Currently supported EMR systems:**
 - [EKA Care](./eka/) - Indian healthcare EMR platform
-- [CARE](./care/js/) - Open Healthcare Network's open source EMR (ohcnetwork/care)
+- [CARE](./care/js/) - Open Healthcare Network's open source EMR (ohcnetwork/care), with a [CARE plugin](./care/plugin/) that fills CARE's Rx pad from a scribe note
 
 ### Why These Adapters?
 
