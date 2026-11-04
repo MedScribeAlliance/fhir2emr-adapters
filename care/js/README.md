@@ -34,7 +34,7 @@ CARE binds codes to value sets (SNOMED for conditions, allergies, medications an
 
 ### Defaults
 
-When the bundle leaves a status out, the adapter uses the same default CARE's form uses for a new entry. Symptoms default to `active`, `confirmed` and `moderate`. Allergies default to `medication` and `low`. Medicine statements default to `information_source: patient`. A symptom whose finding context is `absent` is `refuted`.
+When the bundle leaves a status out, the adapter uses the same default CARE's form uses for a new entry. Symptoms default to `active`, `confirmed` and `moderate`. Allergies default to `medication` and `low`. Medicine statements default to `information_source: patient`. A medicine's `category` comes from the resource, then from the encounter class (`AMB` means outpatient, `IMP` means inpatient), and otherwise defaults to `inpatient`. Its `priority` defaults to `routine`. Those are the two values CARE's Rx pad sets itself, and its API rejects a medicine without them. A symptom whose finding context is `absent` is `refuted`.
 
 ### Dosage
 

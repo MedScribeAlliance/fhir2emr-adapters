@@ -34,6 +34,38 @@ describe("convertFHIRToCare", () => {
     );
   });
 
+  it("sets the category and priority CARE requires on every medicine", () => {
+    const med = {
+      resourceType: "MedicationRequest",
+      medication: { concept: { text: "x" } },
+    };
+    const outpatient = convertFHIRToCare(
+      bundle(
+        { resourceType: "Encounter", class: [{ coding: [{ code: "AMB" }] }] },
+        med,
+      ),
+    );
+    const noEncounter = convertFHIRToCare(bundle(med));
+    const explicit = convertFHIRToCare(
+      bundle({
+        ...med,
+        category: [{ coding: [{ code: "discharge" }] }],
+        priority: "urgent",
+      }),
+    );
+    assert.deepEqual(
+      [outpatient, noEncounter, explicit].map((c) => [
+        c.medication_request[0].category,
+        c.medication_request[0].priority,
+      ]),
+      [
+        ["outpatient", "routine"],
+        ["inpatient", "routine"],
+        ["discharge", "urgent"],
+      ],
+    );
+  });
+
   it("files medical history as a chronic condition", () => {
     const care = convertFHIRToCare(
       bundle({
