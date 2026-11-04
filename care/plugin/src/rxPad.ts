@@ -21,6 +21,7 @@ export function adviceOf(care: CareValues[]): string {
 }
 
 // The same row CARE's Rx pad builds for a newly added medicine, so its form and API accept it.
+// A doctor-chosen code replaces the scribe's, and the scribe's wording is kept in the note.
 export function toRxRows(
   meds: CareMedicationRequest[],
   matches: (Code | undefined)[],
@@ -34,9 +35,10 @@ export function toRxRows(
   return meds.map((med, i) => ({
     ...med,
     medication: matches[i] ?? med.medication,
-    note: matches[i]
-      ? scribeNameNote(med.note, med.medication.display)
-      : med.note,
+    note:
+      matches[i] && matches[i].code !== med.medication.code
+        ? scribeNameNote(med.note, med.medication.display)
+        : med.note,
     encounter: ctx.encounter,
     authored_on: ctx.now,
     requester: ctx.requester,

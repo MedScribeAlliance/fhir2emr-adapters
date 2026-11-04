@@ -8,7 +8,7 @@ A [CARE](https://github.com/ohcnetwork/care_fe) app that sends an encounter to a
 - **`/facility/:facilityId/patient/:patientId/encounter/:encounterId/vaarta/return`**, the `callback_url`. When the doctor publishes, the scribe opens it with a `doc_url` per note. The page:
   1. fetches each `doc_url` (only from the scribe's origin) and decrypts it with the private key kept in IndexedDB;
   2. converts the FHIR bundle with the [CARE adapter](../js/);
-  3. matches each medicine name to a code with CARE's own medicine search (`system-medication`), keeping the scribe's wording in the row's note;
+  3. lists the medicines for the doctor. One the scribe sent with a code is ready; for each one without, the doctor clicks it and picks from CARE's own medicine search (`system-medication`), or leaves it out. Nothing is matched automatically. Dosage fields CARE can't take as sent (an uncoded route, a dose unit CARE doesn't offer, a missing duration) are listed for the doctor to set in the Rx pad;
   4. puts the scribe's advice (`CarePlan`) in the prescription note;
   5. saves a CARE questionnaire draft and opens CARE's form on it (`?continue_draft=`), where the doctor reviews and saves.
 

@@ -49,6 +49,12 @@ describe("toRxRows", () => {
     assert.equal(row.note, undefined);
   });
 
+  it("adds no note when the scribe's own code is kept", () => {
+    const coded = med("Paracetamol", "387517004");
+    const [row] = toRxRows([coded], [coded.medication], ctx);
+    assert.equal(row.note, undefined);
+  });
+
   it("fills what CARE's Rx pad sets on a new row", () => {
     const [row] = toRxRows([med("x", "9")], [undefined], ctx);
     assert.equal(row.encounter, "e1");

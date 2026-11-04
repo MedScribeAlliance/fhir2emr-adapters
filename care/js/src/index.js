@@ -2,6 +2,7 @@ import { categoryCodes, isCoded, textOf } from "./fhir.js";
 import { parseAllergies } from "./parsers/allergies.js";
 import { parseConditions } from "./parsers/conditions.js";
 import {
+  medicationRequestReviewOf,
   parseMedicationRequests,
   parseMedicationStatements,
 } from "./parsers/medications.js";
@@ -37,7 +38,7 @@ export function convertFHIRToCare(bundle, { encounter } = {}) {
   };
   return {
     ...result,
-    review: reviewOf(result),
+    review: [...reviewOf(result), ...medicationRequestReviewOf(bundle)],
     unmapped: unmappedOf(bundle),
   };
 }
@@ -47,27 +48,10 @@ function reviewOf(result) {
   return Object.entries(result).flatMap(([type, items]) =>
     items.flatMap((item, index) => {
       const field = "medication" in item ? "medication" : "code";
-      const issues = [];
-      if (!isCoded(item[field])) {
-        issues.push({
-          type,
-          index,
-          field,
-          issue: "uncoded",
-          text: item[field].display,
-        });
-      }
-      (item.dosage_instruction ?? []).forEach((d, i) => {
-        if (d.timing && !d.timing.repeat.bounds_duration) {
-          issues.push({
-            type,
-            index,
-            field: `dosage_instruction.${i}.timing.repeat.bounds_duration`,
-            issue: "missing",
-          });
-        }
-      });
-      return issues;
+      if (isCoded(item[field])) return [];
+      return [
+        { type, index, field, issue: "uncoded", text: item[field].display },
+      ];
     }),
   );
 }

@@ -30,7 +30,7 @@ Each key matches a CARE `StructuredQuestionType`. Each value has the shape of CA
 
 ### What needs review
 
-CARE binds codes to value sets (SNOMED for conditions, allergies, medications and routes; UCUM for dose units). A FHIR concept with no coding becomes `{ system: "", code: "", display: text }`. It's listed in `review` with `issue: "uncoded"` so the doctor can pick a code. If no treatment length was given, the timing has no `bounds_duration`, which CARE requires. Those entries are listed with `issue: "missing"`.
+CARE binds codes to value sets (SNOMED for conditions, allergies, medications and routes; UCUM for dose units). A FHIR concept with no coding becomes `{ system: "", code: "", display: text }`. It's listed in `review` with `issue: "uncoded"` so the doctor can pick a code. Dosage fields are listed too (see Dosage).
 
 ### Defaults
 
@@ -38,10 +38,15 @@ When the bundle leaves a status out, the adapter uses the same default CARE's fo
 
 ### Dosage
 
-- The frequency, period and period unit pick CARE's GTS timing code (`QD`, `BID`, `TID`, `QID`, `QOD`, `QnH`, `WK`, `MO`). Once a day with `when` set to `HS` or `MORN` becomes `HS` or `AM`.
-- `when` codes and uncoded additional instructions go into `patient_instruction`.
-- Treatment length comes from `timing.repeat.duration`, or from `dispenseRequest.expectedSupplyDuration` when that's missing.
-- A route or as-needed reason is kept only if it's coded.
+Each dosage maps to every field of a CARE Rx pad row:
+
+- **Frequency:** the frequency, period and period unit pick CARE's GTS timing code (`QD`, `BID`, `TID`, `QID`, `QOD`, `QnH`, `WK`, `MO`). Once a day with `when` set to `HS` or `MORN` becomes `HS` or `AM`. `dosage.text` is kept, which CARE also accepts as a frequency.
+- **Duration:** from `timing.repeat.duration`, or `dispenseRequest.expectedSupplyDuration` when that's missing.
+- **Dose and dose range:** only in CARE's own units (`{tbl}`, `g`, `mg`, `ug`, `mL`, `[drp]`, `[iU]`, `{count}`). Common spellings map to them (`tablet` is `{tbl}`, `mcg` is `ug`, `ml` is `mL`). Any other unit stays as text.
+- **Route, site, method, as-needed reason, instructions:** kept when coded.
+- **Nothing is dropped:** a `when` code, an uncoded value, or a dose in a unit CARE doesn't offer goes into `patient_instruction` as text (`Route: by mouth`, `Dose: 1 sachet`).
+
+Every dosage field CARE can't take as sent is also listed in `review`, with its field path (`dosage_instruction.0.route`), the issue (`uncoded`, `missing` or `unit_not_in_care`), the scribe's text and, for coded fields, CARE's value set.
 
 ### Not mapped yet
 

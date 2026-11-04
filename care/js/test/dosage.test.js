@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { toDosageInstruction } from "../src/parsers/dosage.js";
+import { dosageReviewOf, toDosageInstruction } from "../src/parsers/dosage.js";
 
 describe("toDosageInstruction timing code", () => {
   const cases = [
@@ -114,5 +114,137 @@ describe("toDosageInstruction coded fields", () => {
   it("marks a dose as needed when a reason is given", () => {
     const d = toDosageInstruction({ asNeededFor: [{ text: "fever" }] });
     assert.equal(d.as_needed_boolean, true);
+  });
+});
+
+const snomed = (code, display) => ({
+  coding: [{ system: "http://snomed.info/sct", code, display }],
+});
+const dose = (value, unit, code) => ({
+  doseAndRate: [{ doseQuantity: { value, unit, ...(code && { code }) } }],
+});
+
+describe("toDosageInstruction dose unit", () => {
+  const cases = [
+    {
+      name: "tablet becomes CARE's {tbl}",
+      input: dose(1, "tablet"),
+      code: "{tbl}",
+    },
+    { name: "mcg becomes ug", input: dose(250, "mcg"), code: "ug" },
+    { name: "ml becomes mL", input: dose(5, "ml"), code: "mL" },
+    {
+      name: "a CARE code passes through",
+      input: dose(2, "drops", "[drp]"),
+      code: "[drp]",
+    },
+  ];
+  for (const c of cases) {
+    it(c.name, () => {
+      const d = toDosageInstruction(c.input);
+      assert.equal(d.dose_and_rate.dose_quantity.unit.code, c.code);
+      assert.equal(
+        d.dose_and_rate.dose_quantity.unit.system,
+        "http://unitsofmeasure.org",
+      );
+    });
+  }
+
+  it("keeps a unit CARE doesn't offer as text for the doctor", () => {
+    const d = toDosageInstruction(dose(1, "sachet"));
+    assert.equal(d.dose_and_rate, undefined);
+    assert.equal(d.patient_instruction, "Dose: 1 sachet");
+  });
+
+  it("maps a dose range", () => {
+    const d = toDosageInstruction({
+      doseAndRate: [
+        {
+          doseRange: {
+            low: { value: 1, unit: "tablet" },
+            high: { value: 2, unit: "tablet" },
+          },
+        },
+      ],
+    });
+    assert.deepEqual(
+      [
+        d.dose_and_rate.dose_range.low.value,
+        d.dose_and_rate.dose_range.high.value,
+      ],
+      ["1", "2"],
+    );
+  });
+});
+
+describe("toDosageInstruction value-set fields", () => {
+  it("keeps coded route, site and method", () => {
+    const d = toDosageInstruction({
+      route: snomed("26643006", "Oral"),
+      site: snomed("368208006", "Left arm"),
+      method: snomed("421521009", "Swallow"),
+    });
+    assert.deepEqual(
+      [d.route.code, d.site.code, d.method.code],
+      ["26643006", "368208006", "421521009"],
+    );
+  });
+
+  it("moves text-only ones into the patient instruction instead of dropping them", () => {
+    const d = toDosageInstruction({
+      route: { text: "by mouth" },
+      asNeededFor: [{ text: "fever" }],
+    });
+    assert.equal(d.route, undefined);
+    assert.equal(d.patient_instruction, "Route: by mouth, When needed: fever");
+  });
+});
+
+describe("dosageReviewOf", () => {
+  it("lists every field the doctor must set in the Rx pad", () => {
+    const issues = dosageReviewOf({
+      route: { text: "by mouth" },
+      ...dose(1, "sachet"),
+      timing: { repeat: { frequency: 2, period: 1, periodUnit: "d" } },
+    });
+    assert.deepEqual(
+      issues.map((i) => [i.field, i.issue]),
+      [
+        ["route", "uncoded"],
+        ["dose_and_rate", "unit_not_in_care"],
+        ["timing.repeat.bounds_duration", "missing"],
+      ],
+    );
+    assert.equal(issues[0].valueSet, "system-route");
+  });
+
+  it("flags a dosage with no dose and no frequency", () => {
+    assert.deepEqual(
+      dosageReviewOf({}).map((i) => [i.field, i.issue]),
+      [
+        ["dose_and_rate", "missing"],
+        ["timing", "missing"],
+      ],
+    );
+  });
+
+  it("finds nothing to fix in a complete coded dosage", () => {
+    assert.deepEqual(
+      dosageReviewOf({
+        text: "1 tablet thrice daily",
+        route: snomed("26643006", "Oral"),
+        ...dose(1, "tablet"),
+        timing: {
+          repeat: {
+            frequency: 3,
+            period: 1,
+            periodUnit: "d",
+            duration: 5,
+            durationUnit: "d",
+          },
+        },
+      }),
+      [],
+    );
   });
 });

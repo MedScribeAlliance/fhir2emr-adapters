@@ -15,4 +15,17 @@ export const strings = {
   questionnaireMissing: (slug: string) =>
     `CARE has no questionnaire "${slug}" with a medication request question. Ask an admin to create it (see the care_vaarta README).`,
   backToEncounter: "Back to encounter",
+  reviewTitle: "Medicines from Vaarta",
+  reviewHint:
+    "Choose CARE's medicine for each one Vaarta couldn't code. Everything else opens in CARE's Rx pad.",
+  scribeSaid: (name: string) => `Vaarta: ${name}`,
+  chooseMedicine: "Choose medicine",
+  change: "Change",
+  leaveOut: "Leave out",
+  searchMedicines: "Search medicines",
+  searchFailed: "Couldn't search CARE's medicines. Try again.",
+  setInRxPad: (fields: string[]) => `Set in the Rx pad: ${fields.join(", ")}`,
+  continueToRxPad: "Continue to Rx pad",
+  saving: "Opening the Rx pad…",
+  saveFailed: "Couldn't open the Rx pad. Try again.",
 };

@@ -15,7 +15,14 @@ export interface CareMedicationRequest {
 
 export interface CareValues {
   medication_request: CareMedicationRequest[];
-  review: { type: string; index: number; field: string; issue: string }[];
+  review: {
+    type: string;
+    index: number;
+    field: string;
+    issue: "uncoded" | "missing" | "unit_not_in_care";
+    text?: string;
+    valueSet?: string;
+  }[];
   unmapped: { resourceType: string; id?: string; text: string }[];
 }
 

@@ -7,7 +7,7 @@ import {
   textOf,
   toCode,
 } from "../fhir.js";
-import { toDosageInstruction } from "./dosage.js";
+import { dosageReviewOf, toDosageInstruction } from "./dosage.js";
 
 const REQUEST_STATUSES = [
   "active",
@@ -77,6 +77,21 @@ export function parseMedicationRequests(bundle, encounter) {
       ...(encounter && { encounter }),
       dirty: true,
     };
+  });
+}
+
+// Dosage fields per prescription that the doctor has to set in the Rx pad.
+export function medicationRequestReviewOf(bundle) {
+  return resourcesOf(bundle, "MedicationRequest").flatMap((req, index) => {
+    const supply = req.dispenseRequest?.expectedSupplyDuration;
+    return (req.dosageInstruction ?? []).flatMap((dosage, i) =>
+      dosageReviewOf(dosage, supply).map((issue) => ({
+        type: "medication_request",
+        index,
+        ...issue,
+        field: `dosage_instruction.${i}.${issue.field}`,
+      })),
+    );
   });
 }
 
