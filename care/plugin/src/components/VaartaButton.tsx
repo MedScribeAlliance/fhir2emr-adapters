@@ -28,30 +28,27 @@ export default function VaartaButton({ encounter, className }: Props) {
   const [template, setTemplate] = useState(TEMPLATES[0].id);
   const [error, setError] = useState("");
 
-  // The tab opens inside the click so it isn't blocked, then waits for the key pair.
+  // Same tab: Vaarta sends this tab back to callback_url on publish, so the doctor ends where they began.
   const start = async () => {
-    const tab = window.open("", "_blank");
-    if (!tab) return;
-    tab.opener = null;
     try {
       const publicKey = await createPublicKey();
-      tab.location.href = buildHandoffUrl(config.vaartaUrl, {
-        encounterId: encounter.id,
-        title: `${encounter.patient.name} · ${ENCOUNTER_CLASS_LABELS[encounter.encounter_class] ?? encounter.encounter_class}`,
-        attendees: [
-          `${encounter.patient.name} (patient)`,
-          ...encounter.care_team.map(({ member }) =>
-            `${member.first_name} ${member.last_name}`.trim(),
-          ),
-        ].join(", "),
-        languageHint: language,
-        templates: template,
-        callbackUrl: `${window.location.origin}/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/vaarta/return`,
-        publicKey,
-      });
-      dialog.current?.close();
+      window.location.assign(
+        buildHandoffUrl(config.vaartaUrl, {
+          encounterId: encounter.id,
+          title: `${encounter.patient.name} · ${ENCOUNTER_CLASS_LABELS[encounter.encounter_class] ?? encounter.encounter_class}`,
+          attendees: [
+            `${encounter.patient.name} (patient)`,
+            ...encounter.care_team.map(({ member }) =>
+              `${member.first_name} ${member.last_name}`.trim(),
+            ),
+          ].join(", "),
+          languageHint: language,
+          templates: template,
+          callbackUrl: `${window.location.origin}/facility/${encounter.facility.id}/patient/${encounter.patient.id}/encounter/${encounter.id}/vaarta/return`,
+          publicKey,
+        }),
+      );
     } catch (err) {
-      tab.close();
       console.error("start vaarta handoff", err);
       setError(strings.handoffFailed);
     }

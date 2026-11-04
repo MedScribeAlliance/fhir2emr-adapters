@@ -4,7 +4,7 @@ A [CARE](https://github.com/ohcnetwork/care_fe) app that sends an encounter to a
 
 ## What it adds to CARE
 
-- **Take Notes On Vaarta**, in the encounter's actions (`EncounterActions` slot). It asks for a language and template, makes a fresh RSA key pair in the browser, and opens the scribe's `/embed` redirect with the public key and a `callback_url`.
+- **Take Notes On Vaarta**, in the encounter's actions (`EncounterActions` slot). It asks for a language and template, makes a fresh RSA key pair in the browser, and sends the same tab to the scribe's `/embed` redirect with the public key and a `callback_url`. On publish the scribe sends that tab back, so the doctor ends where they began.
 - **`/facility/:facilityId/patient/:patientId/encounter/:encounterId/vaarta/return`**, the `callback_url`. When the doctor publishes, the scribe opens it with a `doc_url` per note. The page:
   1. fetches each `doc_url` (only from the scribe's origin) and decrypts it with the private key kept in IndexedDB;
   2. converts the FHIR bundle with the [CARE adapter](../js/);

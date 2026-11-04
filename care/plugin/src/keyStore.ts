@@ -1,4 +1,4 @@
-// The callback opens in a new tab, so the private key lives in IndexedDB, which every tab shares.
+// A CryptoKey can't go in web storage; IndexedDB keeps it, still non-extractable, across the trip to the scribe and back.
 const DB_NAME = "care_vaarta";
 const STORE = "keys";
 
