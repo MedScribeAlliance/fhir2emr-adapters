@@ -1,0 +1,30 @@
+{
+  "name": "care-emr-adapter",
+  "version": "0.1.0",
+  "description": "Convert MedScribe Alliance (scribe2fhir) FHIR bundles to CARE structured questionnaire values",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "care",
+    "ohc",
+    "emr",
+    "fhir",
+    "medscribe",
+    "scribe",
+    "adapter"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ]
+}
